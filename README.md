@@ -101,6 +101,7 @@ We used **Yahoo Finance** to fetch historical daily price data for major stock i
     - Used consistent shift logic for Japan and European markets.
   - These adjustments ensured repeatability and comparability of results.
 
+PS : This project is one of my first ventures into the field of financial market analysis using statistical and programming tools, and there remains significant scope for improvement.
 
 
 ## How to Run the Project
@@ -119,4 +120,3 @@ Install them via:
 ```bash
 pip install yfinance numpy pandas matplotlib networkx statsmodels
 
-PS : This project is one of my first ventures into the field of financial market analysis using statistical and programming tools, and there remains significant scope for improvement."
