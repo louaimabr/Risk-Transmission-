@@ -1,12 +1,12 @@
 # Risk Transmission Analysis in G7 Financial Markets
+Initially, this project aimed to analyze **risk transmission dynamics** between different sectors (e.g., Tech, Healthcare, Housing). However, to simplify the initial scope, we began by focusing on the financial markets of **G7 countries**. This provided a solid foundation for understanding inter-market dependencies before expanding to sector-specific analysis.
 
 ## Purpose
 This project analyzes **risk transmission dynamics** between the financial markets of G7 countries. By leveraging **Granger causality tests**, it identifies:
 - **Risk Transmitters**: Markets that influence others.
 - **Risk Absorbers**: Markets heavily influenced by others.
 
-The project visualizes these relationships as a **directed graph**, allowing for a better understanding of inter-market dependencies.
-
+The project visualizes these relationships as a directed graph, allowing for a better understanding of inter-market dependencies. Additionally, it provides rankings for each country based on cumulative F-statistics for both risk absorption and transmission.
 ---
 
 ## Tools and Techniques
@@ -22,11 +22,12 @@ We used **Yahoo Finance** to fetch historical daily price data for major stock i
 - **Japan**: Nikkei 225 (^N225)
 
 ### 2. Data Preprocessing
-- **Log Returns**: Computed daily logarithmic returns to ensure stationarity.
+- **Daily Price Differences**:
+  - The analysis is based on daily price differences: `price[t] - price[t-1]`.
+  - This ensures stationarity in the data without applying logarithmic transformations.
 - **Time Zone Alignment**:
   - Shifted **Japan's data by -1 day** to align with European and North American markets.
-  - Experimented with shifting **European markets by -1 day** for alignment with North America.
-- **Mean Prices**: Tested both close prices and mean prices calculated as `(Open + High + Low + Close) / 4`.
+  - Optional **-1 day shift for European markets** to better align with North American close times.
 
 ### 3. Granger Causality Analysis
 - **Pairwise Tests**:
@@ -34,6 +35,7 @@ We used **Yahoo Finance** to fetch historical daily price data for major stock i
   - Tested lags from `1 to 5 days`.
 - **Thresholds**:
   - P-value < 0.05 for significance.
+  - F-statistic > 10 for meaningful causality strength.
 - Results were stored in `significant_results.csv`, including:
   - Source, Target, Lag, F-statistic, and P-value.
 
@@ -45,30 +47,60 @@ We used **Yahoo Finance** to fetch historical daily price data for major stock i
   - **SDO (Sum of Outgoing F-statistics)**: Measures risk transmission.
   - **SDI (Sum of Incoming F-statistics)**: Measures risk absorption.
 - **Graph Filtering**:
-  - Removed edges with low F-statistics or insignificant p-values to improve readability.
+  - Edges with low F-statistics or insignificant p-values are removed for better readability.
 
 ---
 
 ## Difficulties and Solutions
 
 ### 1. Time Zone Differences
-- **Problem**: Financial markets operate in different time zones, causing misalignment and biased analysis:
+- **Problem**:  
+  Financial markets operate in different time zones, causing misalignment:
   - Japan closes before Europe and North America open.
   - Europe closes before North America closes.
-- **Solution**:
-  - Shifted Japan's data by **-1 day**.
-  - Tested with and without shifting European data.
+
+- **Solution**:  
+  - Shifted **Japan's data by -1 day** to align its closing prices with Europe and North America.
+  - Experimented with **shifting European data by -1 day**, testing its impact on causality relationships.
+  - This alignment allowed for consistent comparisons between markets and improved the accuracy of the analysis.
+
+---
 
 ### 2. Data Availability
-- **Problem**: Access to intra-day data was not feasible.
-- **Solution**:
-  - Focused on daily data .
-  - Used close prices as the primary metric and tested mean prices as an alternative (it doesn't work).
+- **Problem**:  
+  Free access to **intra-day data** was not feasible. Intra-day data would have allowed for more precise alignment of markets, but its high cost posed a challenge.
+- **Solution**:  
+  - Focused on **daily price differences** as a cost-effective alternative.
+  - Conducted experiments with:
+    - **Weekly closes prices**. (But we have less data to work on)
+    - **Mean prices** using `(Open + High + Low + Close) / 4`.
+    - **Volume-Weighted Average Price (VWAP)**.
+  - Ultimately settled on **daily close prices**, which were consistent and reliable.
 
-### 3. Edge Overlap in Graphs
-- **Problem**: Too many edges made graphs unreadable.
-- **Solution**:
-  - Applied thresholds (`p-value < 0.05`, `F-stat > 10`) to retain only significant edges.
+---
+
+### 3. Graph Complexity and Readability
+- **Problem**:  
+  The Granger causality graph often became cluttered with too many edges, making it difficult to interpret key relationships between countries.
+
+- **Solution**:  
+  - Applied strict filtering thresholds:
+    - **P-value < 0.05** for statistical significance.
+    - **F-statistic > 10** to focus on meaningful relationships.
+  - Removed weak or insignificant edges to declutter the graph.
+  - Adjusted node sizes and edge widths based on SDI/SDO values and F-statistics, improving visual clarity.
+
+---
+
+### 4. Interpretation of Results
+- **Problem**:  
+  Rankings of countries (based on SDO/SDI) varied inconsistently during experiments with different shifts and filtering parameters.
+- **Solution**:  
+  - Standardized preprocessing steps and filtering thresholds to ensure consistency:
+    - Fixed the same p-value and F-statistic criteria across all tests.
+    - Used consistent shift logic for Japan and European markets.
+  - These adjustments ensured repeatability and comparability of results.
+
 
 
 ## How to Run the Project
