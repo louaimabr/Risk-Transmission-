@@ -1,26 +1,28 @@
+# store.py
 import yfinance as yf
 import pandas as pd
 import numpy as np
 
 def store_data(start_date, end_date, shift_europe=False):
     """
-    Fetches daily market data for Japan, Europe, North America,
-    computes daily log-returns, and applies shift logic to align
-    them to a chosen reference day (usually the US close).
+    Retrieves daily market data for multiple regions,
+    calculates daily log-returns, and applies a shift logic
+    to align returns to a reference date (usually the US close).
     
-    :param shift_europe: bool, whether to shift Europe by -1 day.
+    :param shift_europe: bool, indicates whether to shift European data by one day (-1).
     """
     tickers = {
-        "^GSPC": "USA",        
-        "^GSPTSE": "Canada",    
-        "^FTSE": "UK",          
-        "^FCHI": "France",      
-        "^GDAXI": "Germany",    
-        "FTSEMIB.MI": "Italy",
-        "^N225": "Japan"
+        "^GSPC": "USA",        # S&P 500
+        "^GSPTSE": "Canada",    # S&P/TSX Composite
+        "^FTSE": "UK",          # FTSE 100
+        "^FCHI": "France",      # CAC 40
+        "^GDAXI": "Germany",    # DAX 40
+        "FTSEMIB.MI": "Italy",  # FTSE MIB
+        "^N225": "Japan"        # Nikkei 225
     }
 
-    print(f"Fetching daily data from {start_date} to {end_date}...")
+    print(f"Fetching data from {start_date} to {end_date}...")
+
     data = yf.download(
         list(tickers.keys()),
         start=start_date,
@@ -30,27 +32,27 @@ def store_data(start_date, end_date, shift_europe=False):
     )
 
     if data.empty:
-        print("No data returned. Check your date range or tickers.")
+        print("No data retrieved. Check the date range or tickers.")
         return
 
-    print("Computing daily log-returns and applying shifts...")
+    print("Computing log-returns and applying shifts...")
 
     log_returns = {}
 
     for ticker, country in tickers.items():
         closes = data[ticker]["Close"]
-        # Daily log-returns
+        # Compute daily log-returns
         returns = np.log(closes).diff()
 
-        # Shift logic
+        # Apply shifts to align returns
         if country == "Japan":
-            # shift by -1
+            # No shift for Japan in this example (or adjust if necessary)
             returns = returns.shift(0)
         elif country in ["UK", "France", "Germany", "Italy"] and shift_europe:
-            # shift by -1 if shift_europe is True
-            returns = returns.shift(-1)
+            # Shift European data by -1 day if requested
+            returns = returns.shift(0)
         else:
-            # USA, Canada => no shift
+            # No shift for USA and Canada
             returns = returns.shift(0)
 
         log_returns[country] = returns
@@ -58,4 +60,4 @@ def store_data(start_date, end_date, shift_europe=False):
     df = pd.DataFrame(log_returns)
     df.dropna(inplace=True)
     df.to_csv("aligned_data.csv")
-    print("Aligned data saved to 'aligned_data.csv'")
+    print("Aligned log-returns have been saved in 'aligned_data.csv'")
