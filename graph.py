@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 def graph():
     df = pd.read_csv("significant_results.csv")
     if df.empty:
-        print("Aucun résultat de causalité significatif n'a été trouvé. Le graphe sera vide.")
+        print("No significant Granger causality results found. The graph will be empty.")
         return
 
-    # Filtre : garder uniquement les liens dont la F-statistic est > 100
+    # Filter: keep only edges with F-statistic > 150
     df = df[df["F-statistic"] > 150]
     if df.empty:
-        print("Après filtrage (F-statistic > 150), plus aucun lien n'est significatif.")
+        print("After filtering (F-statistic > 150), no significant links remain.")
         return
 
     G = nx.DiGraph()
@@ -33,49 +33,49 @@ def graph():
         metrics[source]["SDO"] += f_stat
         metrics[target]["SDI"] += f_stat
 
-    # Classements
+    # Rankings
     sorted_absorbers = sorted(metrics.items(), key=lambda x: x[1]["SDI"], reverse=True)
     sorted_transmitters = sorted(metrics.items(), key=lambda x: x[1]["SDO"], reverse=True)
 
-    print("\nPays les plus 'absorbants' (SDI):")
+    print("\nMost 'Absorbing' Countries (SDI):")
     for country, vals in sorted_absorbers:
         print(f"{country}: SDI = {vals['SDI']:.2f}")
 
-    print("\nPays les plus 'transmetteurs' (SDO):")
+    print("\nMost 'Transmitting' Countries (SDO):")
     for country, vals in sorted_transmitters:
         print(f"{country}: SDO = {vals['SDO']:.2f}")
 
-    # Layout : spring_layout
+    # Layout: planar_layout
     pos = nx.planar_layout(G)
 
     plt.figure(figsize=(12, 7))
 
-    # Dessin des nœuds
+    # Draw nodes
     nx.draw_networkx_nodes(
         G, pos,
-        node_size=2000,  # Ajustez selon vos préférences
+        node_size=2000,  # Adjust as needed
         node_color="lightblue"
     )
 
-    # Labels des nœuds
+    # Draw node labels
     nx.draw_networkx_labels(
         G, pos,
         font_size=10,
         font_weight="bold"
     )
 
-    # Dessin des arêtes (lignes droites) avec flèches
+    # Draw edges (straight lines) with arrows
     nx.draw_networkx_edges(
         G, pos,
-        arrowstyle='-|>',  # ou '->'
+        arrowstyle='-|>',  # or '->'
         arrows=True,
         arrowsize=20,
         edge_color='gray',
-        min_source_margin=15,  # éloigne la flèche du nœud source
-        min_target_margin=15   # éloigne la flèche du nœud cible
+        min_source_margin=15,  # Moves the arrow away from the source node
+        min_target_margin=15   # Moves the arrow away from the target node
     )
 
-    # Labels des arêtes : F-stat et lag
+    # Edge labels: F-stat and lag
     edge_labels = {
         (u, v): f"{d['weight']:.2f} (Lag {d['lag']})"
         for u, v, d in G.edges(data=True)
@@ -87,7 +87,7 @@ def graph():
         label_pos=0.5
     )
 
-    plt.title("Réseau de Causalité de Granger (F-stat > 100)")
+    plt.title("Granger Causality Network (F-stat > 100)")
     plt.axis("off")
     plt.tight_layout()
     plt.show()
