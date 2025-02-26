@@ -1,7 +1,13 @@
+# granger_causality.py
 import pandas as pd
 from statsmodels.tsa.stattools import grangercausalitytests
 
 def granger_causality():
+    """
+    Reads the log-returns from 'aligned_data.csv', performs Granger causality tests
+    between each pair of countries, and records significant results (p-value < 0.05)
+    in 'significant_results.csv'.
+    """
     data = pd.read_csv("aligned_data.csv", index_col=0, parse_dates=True)
     results_list = []
     columns = data.columns
@@ -40,4 +46,4 @@ def granger_causality():
 
     df_results = pd.DataFrame(results_list)
     df_results.to_csv("significant_results.csv", index=False)
-    print("Granger causality results saved to 'significant_results.csv'")
+    print("Granger causality results have been saved in 'significant_results.csv'")
