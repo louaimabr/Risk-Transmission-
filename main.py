@@ -12,7 +12,7 @@ if __name__ == "__main__":
     end_date = "2020-12-31"
 
     # 1. Fetch data & store aligned log-returns
-    #store_data("2000-01-01", "2020-12-31", shift_europe=False)
+    store_data("2000-01-01", "2020-12-31", shift_europe=False)
 
     # 2. Perform Granger causality tests
     granger_causality()
